@@ -236,6 +236,22 @@
 
     .toolbar-note { color: var(--muted); font-size: 12px; }
 
+    .mobile-audio-card {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(220, 226, 215, .34);
+    }
+
+    .mobile-audio-card .audio-copy {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
     .content { min-height: 545px; padding: 34px clamp(24px, 5vw, 58px) 38px; }
 
     .section-heading {
@@ -550,6 +566,8 @@
       .tabs { width: 100%; }
       .tab-button { flex: 1; min-width: 0; }
       .toolbar-note { display: none; }
+      .mobile-audio-card { display: flex; }
+      .desktop-audio-card { display: none; }
       .content { min-height: 520px; padding: 27px 22px 30px; }
       .section-heading { margin-bottom: 18px; }
       .article-text { font-size: 20px; line-height: 1.95; }
@@ -607,6 +625,11 @@
             <button class="tab-button" data-mode="write" type="button">默写</button>
           </nav>
           <span class="toolbar-note" id="toolbarNote">读一遍，找出画面转换</span>
+        </div>
+
+        <div class="mobile-audio-card" aria-label="当前段朗读">
+          <div class="audio-copy"><strong>朗读</strong><span id="mobileAudioStatus">当前段 · 舒缓语速</span></div>
+          <button class="audio-button" id="mobileAudioButton" type="button" aria-label="朗读当前段" title="朗读当前段">▶</button>
         </div>
 
         <div class="content">
@@ -670,7 +693,7 @@
           <nav class="section-nav" id="sectionNav" aria-label="选择段落"></nav>
         </section>
 
-        <section class="side-card">
+        <section class="side-card desktop-audio-card">
           <div class="audio-row">
             <div class="audio-copy"><strong>朗读</strong><span id="audioStatus">当前段 · 舒缓语速</span></div>
             <button class="audio-button" id="audioButton" type="button" aria-label="朗读当前段" title="朗读当前段">▶</button>
@@ -1026,9 +1049,13 @@
 
     function setSpeaking(value) {
       state.speaking = value;
-      $("#audioButton").textContent = value ? "■" : "▶";
-      $("#audioButton").setAttribute("aria-label", value ? "停止朗读" : "朗读当前段");
-      $("#audioStatus").textContent = value ? "正在朗读 · 点击停止" : "当前段 · 舒缓语速";
+      $$(".audio-button").forEach(button => {
+        button.textContent = value ? "■" : "▶";
+        button.setAttribute("aria-label", value ? "停止朗读" : "朗读当前段");
+      });
+      ["#audioStatus", "#mobileAudioStatus"].forEach(selector => {
+        $(selector).textContent = value ? "正在朗读 · 点击停止" : "当前段 · 舒缓语速";
+      });
     }
 
     function stopSpeech() {
@@ -1060,7 +1087,7 @@
     $("#checkButton").addEventListener("click", checkDictation);
     $("#hintButton").addEventListener("click", giveHint);
     $("#clearButton").addEventListener("click", () => { $("#dictation").value = ""; $("#result").classList.remove("visible"); $("#dictation").focus(); });
-    $("#audioButton").addEventListener("click", speak);
+    $$(".audio-button").forEach(button => button.addEventListener("click", speak));
     $("#focusButton").addEventListener("click", () => {
       state.focus = !state.focus;
       $("#sidebar").style.display = state.focus ? "none" : "";
