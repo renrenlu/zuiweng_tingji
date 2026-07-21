@@ -157,13 +157,32 @@
       line-height: .98;
     }
 
-    .author {
-      margin: 18px 0 0;
-      color: var(--muted);
-      font-family: var(--serif);
-      font-size: 17px;
-      letter-spacing: .3em;
+    .author-profile {
+      max-width: 780px;
+      margin-top: 22px;
+      padding: 15px 18px 16px;
+      border-left: 2px solid var(--cinnabar);
+      border-radius: 0 12px 12px 0;
+      background: rgba(255, 255, 255, .35);
     }
+
+    .author-profile h2 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: .12em;
+    }
+
+    .author-profile p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.72;
+    }
+
+    .author-profile strong { color: var(--moss); font-weight: 750; }
 
     .route-card {
       position: relative;
@@ -566,7 +585,12 @@
       <div>
         <p class="eyebrow">北宋名篇 · 欧阳修</p>
         <h1 id="pageTitle">醉翁亭记</h1>
-        <p class="author">作者：欧阳修（北宋）</p>
+        <section class="author-profile" aria-labelledby="authorTitle">
+          <h2 id="authorTitle">作者 · 欧阳修</h2>
+          <p>北宋文学家、史学家，生于1007年，卒于1072年，字永叔，号醉翁，晚年号六一居士，谥号文忠，吉州永丰（今属江西）人。</p>
+          <p><strong>“六一居士”的含义：</strong>六个“一”分别为：藏书一万卷，金石遗文一千卷，琴一张，棋一局，酒一壶，老翁一人（欧阳修本人），因此号六一居士。</p>
+          <p><strong>唐宋八大家名录：</strong>唐代：韩愈、柳宗元；宋代：欧阳修、苏洵、苏轼、苏辙、王安石、曾巩，共八位。</p>
+        </section>
       </div>
       <aside class="route-card" aria-label="全文记忆线索">
         <strong>先记住一条路线</strong>
