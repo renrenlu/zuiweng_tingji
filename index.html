@@ -932,6 +932,7 @@
         routeLine: "山水 → 朝暮四时 → 滁人宴游 → 与民同乐",
         routeDescription: "四幅画面顺次展开，最后落在“太守之乐”。",
         mapLabel: "四段记忆地图",
+        audioIdleStatus: "当前段 · 舒缓语速",
         sections: zuiwengSections,
         audioFiles: [
           "醉翁亭记音频/zuiweng-1.mp3",
@@ -954,9 +955,10 @@
         routeLine: "春花秋月 → 小楼东风 → 故国月明 → 雕栏朱颜 → 一江愁水",
         routeDescription: "从“物是人非”写到“愁如江水”，上阕追忆，下阕作结。",
         mapLabel: "全文记忆地图",
+        audioIdleStatus: "全文 · 读音已校准",
         sections: yumeirenSections,
         audioFiles: [
-          "虞美人音频/yumeiren-full.mp3"
+          "虞美人音频/yumeiren-full-v2.mp3"
         ]
       }
     ];
@@ -1028,6 +1030,11 @@
       $("#routeLine").textContent = work.routeLine;
       $("#routeDescription").textContent = work.routeDescription;
       $("#mapLabel").textContent = work.mapLabel;
+      if (!state.speaking) {
+        ["#audioStatus", "#mobileAudioStatus"].forEach(selector => {
+          $(selector).textContent = work.audioIdleStatus;
+        });
+      }
       $$(".work-button").forEach(button => {
         const active = Number(button.dataset.work) === state.work;
         button.classList.toggle("active", active);
@@ -1276,7 +1283,7 @@
         button.setAttribute("aria-label", value ? "停止朗读" : "朗读当前段");
       });
       ["#audioStatus", "#mobileAudioStatus"].forEach(selector => {
-        $(selector).textContent = value ? "正在朗读 · 点击停止" : "当前段 · 舒缓语速";
+        $(selector).textContent = value ? "正在朗读 · 点击停止" : works[state.work].audioIdleStatus;
       });
     }
 
