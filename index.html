@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#f4efe3" />
-  <meta name="description" content="《醉翁亭记》互动背诵练习：分段学习、逐级消隐、默写检查与本地进度记录。" />
-  <title>醉翁亭记 · 互动背诵</title>
+  <meta name="description" content="《醉翁亭记》《虞美人》互动背诵练习：篇目切换、分段学习、逐级消隐、默写检查、重点词语与真人感朗读。" />
+  <title>古文背诵馆 · 醉翁亭记与虞美人</title>
   <style>
     :root {
       --paper: #f6f1e6;
@@ -103,7 +103,7 @@
 
     .top-actions { display: flex; gap: 8px; }
 
-    .icon-button, .quiet-button, .solid-button, .segment-button, .tab-button {
+    .icon-button, .quiet-button, .solid-button, .segment-button, .tab-button, .work-button {
       border: 0;
       cursor: pointer;
       transition: transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
@@ -126,6 +126,47 @@
     }
 
     .icon-button[data-active="true"] { background: var(--moss); color: #fff; }
+
+    .work-switcher {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: max-content;
+      max-width: 100%;
+      margin: -18px 0 30px;
+      padding: 5px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .42);
+      box-shadow: 0 8px 24px rgba(61, 53, 36, .04);
+      scrollbar-width: none;
+    }
+
+    .work-switcher::-webkit-scrollbar { display: none; }
+
+    .work-switcher > span {
+      padding: 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      white-space: nowrap;
+    }
+
+    .work-button {
+      min-height: 36px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .work-button:hover { color: var(--ink); background: rgba(66, 89, 72, .08); }
+    .work-button.active { color: #fff; background: var(--cinnabar); }
 
     .hero {
       display: grid;
@@ -558,6 +599,8 @@
     @media (max-width: 620px) {
       .shell { width: min(100% - 24px, 1180px); padding-top: 15px; }
       .topbar { margin-bottom: 28px; }
+      .work-switcher { width: 100%; margin-top: -16px; }
+      .work-button { flex: 1; }
       .top-actions .icon-button span { display: none; }
       .icon-button { padding: 0 12px; }
       h1 { font-size: 48px; }
@@ -599,11 +642,17 @@
       </div>
     </header>
 
+    <nav class="work-switcher" id="workSwitcher" aria-label="选择背诵篇目">
+      <span>背诵篇目</span>
+      <button class="work-button active" data-work="0" type="button">醉翁亭记</button>
+      <button class="work-button" data-work="1" type="button">虞美人</button>
+    </nav>
+
     <section class="hero" aria-labelledby="pageTitle">
       <div>
-        <p class="eyebrow">北宋名篇 · 欧阳修</p>
+        <p class="eyebrow" id="heroEyebrow">北宋名篇 · 欧阳修</p>
         <h1 id="pageTitle">醉翁亭记</h1>
-        <section class="author-profile" aria-labelledby="authorTitle">
+        <section class="author-profile" id="authorProfile" aria-labelledby="authorTitle">
           <h2 id="authorTitle">作者 · 欧阳修</h2>
           <p>北宋文学家、史学家，生于1007年，卒于1072年，字永叔，号醉翁，晚年号六一居士，谥号文忠，吉州永丰（今属江西）人。</p>
           <p><strong>“六一居士”的含义：</strong>六个“一”分别为：藏书一万卷，金石遗文一千卷，琴一张，棋一局，酒一壶，老翁一人（欧阳修本人），因此号六一居士。</p>
@@ -611,8 +660,8 @@
         </section>
       </div>
       <aside class="route-card" aria-label="全文记忆线索">
-        <strong>先记住一条路线</strong>
-        <p><span class="route-line">山水 → 朝暮四时 → 滁人宴游 → 与民同乐</span><br>四幅画面顺次展开，最后落在“太守之乐”。</p>
+        <strong id="routeTitle">先记住一条路线</strong>
+        <p><span class="route-line" id="routeLine">山水 → 朝暮四时 → 滁人宴游 → 与民同乐</span><br><span id="routeDescription">四幅画面顺次展开，最后落在“太守之乐”。</span></p>
       </aside>
     </section>
 
@@ -689,7 +738,7 @@
         </section>
 
         <section class="side-card">
-          <p class="side-label">四段记忆地图</p>
+          <p class="side-label" id="mapLabel">四段记忆地图</p>
           <nav class="section-nav" id="sectionNav" aria-label="选择段落"></nav>
         </section>
 
@@ -719,7 +768,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    const sections = [
+    const zuiwengSections = [
       {
         title: "亭之由来",
         tag: "山水定位",
@@ -801,24 +850,105 @@
       }
     ];
 
+    const yumeirenSections = [
+      {
+        title: "月明故国",
+        tag: "触景伤怀",
+        phase: "上阕 · 由景入情",
+        number: "上",
+        nav: "春花秋月",
+        text: "春花秋月何时了？往事知多少。小楼昨夜又东风，故国不堪回首月明中。",
+        tip: "按时间与空间推进：春花秋月（眼前）→ 往事（过去）→ 小楼东风（昨夜）→ 故国月明（遥想）。",
+        glossary: [
+          { word: "何时了", meaning: "什么时候才能结束。了，完结。" },
+          { word: "往事", meaning: "指昔日南唐宫廷生活。" },
+          { word: "又东风", meaning: "春风再次吹来，点明又过了一年。" },
+          { word: "故国", meaning: "已经灭亡的南唐。" },
+          { word: "不堪回首", meaning: "不忍回想。" },
+          { word: "月明中", meaning: "明月照耀之下。" }
+        ]
+      },
+      {
+        title: "一江愁水",
+        tag: "以水喻愁",
+        phase: "下阕 · 由问作结",
+        number: "下",
+        nav: "一江春水",
+        text: "雕栏玉砌应犹在，只是朱颜改。问君能有几多愁？恰似一江春水向东流。",
+        tip: "先写物是人非：雕栏玉砌犹在、朱颜已改；再以问答收束，把无形的愁化成滚滚东流的江水。",
+        glossary: [
+          { word: "雕栏玉砌", meaning: "雕花栏杆和玉石台阶，代指旧日宫殿。" },
+          { word: "应犹在", meaning: "应该还在。犹，还。" },
+          { word: "朱颜改", meaning: "红润的容颜已经改变，也暗含人事变迁。" },
+          { word: "问君", meaning: "词人自问。" },
+          { word: "几多", meaning: "多少。" },
+          { word: "恰似", meaning: "正像。" },
+          { word: "一江春水", meaning: "以奔流不尽的江水比喻绵长无尽的愁。" }
+        ]
+      }
+    ];
+
+    const works = [
+      {
+        id: "zuiweng",
+        title: "醉翁亭记",
+        pageTitle: "醉翁亭记 · 互动背诵",
+        eyebrow: "北宋名篇 · 欧阳修",
+        authorHtml: `
+          <h2 id="authorTitle">作者 · 欧阳修</h2>
+          <p>北宋文学家、史学家，生于1007年，卒于1072年，字永叔，号醉翁，晚年号六一居士，谥号文忠，吉州永丰（今属江西）人。</p>
+          <p><strong>“六一居士”的含义：</strong>六个“一”分别为：藏书一万卷，金石遗文一千卷，琴一张，棋一局，酒一壶，老翁一人（欧阳修本人），因此号六一居士。</p>
+          <p><strong>唐宋八大家名录：</strong>唐代：韩愈、柳宗元；宋代：欧阳修、苏洵、苏轼、苏辙、王安石、曾巩，共八位。</p>`,
+        routeTitle: "先记住一条路线",
+        routeLine: "山水 → 朝暮四时 → 滁人宴游 → 与民同乐",
+        routeDescription: "四幅画面顺次展开，最后落在“太守之乐”。",
+        mapLabel: "四段记忆地图",
+        sections: zuiwengSections,
+        audioFiles: [
+          "醉翁亭记音频/zuiweng-1.mp3",
+          "醉翁亭记音频/zuiweng-2.mp3",
+          "醉翁亭记音频/zuiweng-3.mp3",
+          "醉翁亭记音频/zuiweng-4.mp3"
+        ]
+      },
+      {
+        id: "yumeiren",
+        title: "虞美人",
+        pageTitle: "虞美人 · 互动背诵",
+        eyebrow: "南唐绝唱 · 李煜",
+        authorHtml: `
+          <h2 id="authorTitle">作者 · 李煜</h2>
+          <p>李煜（937—978），字重光，号钟隐、莲峰居士，南唐末代国君，世称“南唐后主”。</p>
+          <p><strong>词作特点：</strong>前期多写宫廷生活，亡国后多写故国之思与身世之悲；语言明白如话，感情真挚深沉。</p>
+          <p><strong>篇目背景：</strong>本词写于李煜亡国被俘之后，以春花秋月反衬亡国之痛，以一江春水比喻无尽哀愁。</p>`,
+        routeTitle: "先记住一条情感线",
+        routeLine: "春花秋月 → 小楼东风 → 故国月明 → 雕栏朱颜 → 一江愁水",
+        routeDescription: "从“物是人非”写到“愁如江水”，上阕追忆，下阕作结。",
+        mapLabel: "上下阕记忆地图",
+        sections: yumeirenSections,
+        audioFiles: [
+          "虞美人音频/yumeiren-1.mp3",
+          "虞美人音频/yumeiren-2.mp3"
+        ]
+      }
+    ];
+
     const punctuation = /([。！？；，、：])/g;
     const cleanText = text => text.replace(/[\s，。！？；：、,.!?;:“”‘’（）()《》]/g, "");
+    const savedWork = Number(localStorage.getItem("memorize-work") || 0);
     const state = {
+      work: Number.isInteger(savedWork) && savedWork >= 0 && savedWork < works.length ? savedWork : 0,
       section: 0,
       mode: "learn",
       blank: 50,
-      done: JSON.parse(localStorage.getItem("zuiweng-done") || "[]"),
-      best: JSON.parse(localStorage.getItem("zuiweng-best") || "{}"),
+      done: [],
+      best: {},
       speaking: false,
       focus: false
     };
 
-    const audioFiles = [
-      "醉翁亭记音频/zuiweng-1.mp3",
-      "醉翁亭记音频/zuiweng-2.mp3",
-      "醉翁亭记音频/zuiweng-3.mp3",
-      "醉翁亭记音频/zuiweng-4.mp3"
-    ];
+    let sections = works[state.work].sections;
+    let audioFiles = works[state.work].audioFiles;
     const audioPlayer = new Audio();
     audioPlayer.preload = "metadata";
     audioPlayer.addEventListener("ended", () => setSpeaking(false));
@@ -829,6 +959,47 @@
 
     const $ = selector => document.querySelector(selector);
     const $$ = selector => [...document.querySelectorAll(selector)];
+
+    function storageKey(kind) {
+      return `memorize-${works[state.work].id}-${kind}`;
+    }
+
+    function readStoredJSON(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+      catch (error) { return fallback; }
+    }
+
+    function loadWorkProgress() {
+      const work = works[state.work];
+      if (work.id === "zuiweng") {
+        [["done", "zuiweng-done"], ["best", "zuiweng-best"]].forEach(([kind, legacyKey]) => {
+          if (!localStorage.getItem(storageKey(kind)) && localStorage.getItem(legacyKey)) {
+            localStorage.setItem(storageKey(kind), localStorage.getItem(legacyKey));
+          }
+        });
+      }
+      sections = work.sections;
+      audioFiles = work.audioFiles;
+      state.done = readStoredJSON(storageKey("done"), []);
+      state.best = readStoredJSON(storageKey("best"), {});
+    }
+
+    function renderWork() {
+      const work = works[state.work];
+      document.title = work.pageTitle;
+      $("#heroEyebrow").textContent = work.eyebrow;
+      $("#pageTitle").textContent = work.title;
+      $("#authorProfile").innerHTML = work.authorHtml;
+      $("#routeTitle").textContent = work.routeTitle;
+      $("#routeLine").textContent = work.routeLine;
+      $("#routeDescription").textContent = work.routeDescription;
+      $("#mapLabel").textContent = work.mapLabel;
+      $$(".work-button").forEach(button => {
+        const active = Number(button.dataset.work) === state.work;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
 
     function clausesOf(text) {
       return text.split(punctuation).filter(Boolean).reduce((parts, part) => {
@@ -962,6 +1133,20 @@
       renderSection();
     }
 
+    function selectWork(index) {
+      if (index === state.work || !works[index]) return;
+      stopSpeech();
+      state.work = index;
+      state.section = 0;
+      localStorage.setItem("memorize-work", String(index));
+      loadWorkProgress();
+      renderWork();
+      setMode("learn");
+      renderSection();
+      updateProgress();
+      showToast(`已切换到《${works[index].title}》`);
+    }
+
     function setMode(mode) {
       state.mode = mode;
       $$(".tab-button").forEach(button => button.classList.toggle("active", button.dataset.mode === mode));
@@ -1010,8 +1195,8 @@
       $("#result").classList.add("visible");
       state.best[state.section] = Math.max(state.best[state.section] || 0, result.score);
       if (result.score >= 90 && !state.done.includes(state.section)) state.done.push(state.section);
-      localStorage.setItem("zuiweng-best", JSON.stringify(state.best));
-      localStorage.setItem("zuiweng-done", JSON.stringify(state.done));
+      localStorage.setItem(storageKey("best"), JSON.stringify(state.best));
+      localStorage.setItem(storageKey("done"), JSON.stringify(state.done));
       renderNav();
       updateProgress();
     }
@@ -1027,8 +1212,8 @@
 
     function updateProgress() {
       const count = state.done.length;
-      $("#progressText").textContent = `${count} / 4`;
-      $("#progressFill").style.width = `${count / 4 * 100}%`;
+      $("#progressText").textContent = `${count} / ${sections.length}`;
+      $("#progressFill").style.width = `${count / sections.length * 100}%`;
     }
 
     async function speak() {
@@ -1078,6 +1263,7 @@
       showToast.timer = setTimeout(() => toast.classList.remove("show"), 2100);
     }
 
+    $$(".work-button").forEach(button => button.addEventListener("click", () => selectWork(Number(button.dataset.work))));
     $$(".tab-button").forEach(button => button.addEventListener("click", () => setMode(button.dataset.mode)));
     $("#blankRange").addEventListener("input", event => {
       state.blank = Number(event.target.value);
@@ -1098,11 +1284,11 @@
       showToast(state.focus ? "已进入专注模式" : "已退出专注模式");
     });
     $("#resetButton").addEventListener("click", () => {
-      if (!confirm("确定清除《醉翁亭记》的默写成绩和进度吗？")) return;
+      if (!confirm(`确定清除《${works[state.work].title}》的默写成绩和进度吗？`)) return;
       state.done = [];
       state.best = {};
-      localStorage.removeItem("zuiweng-done");
-      localStorage.removeItem("zuiweng-best");
+      localStorage.removeItem(storageKey("done"));
+      localStorage.removeItem(storageKey("best"));
       renderNav();
       updateProgress();
       showToast("学习记录已清除");
@@ -1120,6 +1306,8 @@
     });
 
     window.addEventListener("beforeunload", stopSpeech);
+    loadWorkProgress();
+    renderWork();
     renderSection();
     updateProgress();
   </script>
