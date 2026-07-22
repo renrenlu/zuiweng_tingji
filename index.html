@@ -277,6 +277,8 @@
 
     .toolbar-note { color: var(--muted); font-size: 12px; }
 
+    .mobile-memory-map { display: none; }
+
     .mobile-audio-card {
       display: none;
       align-items: center;
@@ -609,8 +611,42 @@
       .tabs { width: 100%; }
       .tab-button { flex: 1; min-width: 0; }
       .toolbar-note { display: none; }
+      .mobile-memory-map {
+        display: block;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(237, 228, 209, .38);
+      }
+      .mobile-section-nav { display: grid; gap: 6px; }
+      .mobile-memory-map .segment-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+        min-height: 36px;
+        padding: 6px 4px;
+        border: 1px solid rgba(66, 89, 72, .12);
+        background: rgba(255, 255, 255, .46);
+        text-align: center;
+      }
+      .mobile-memory-map .segment-button.active { background: var(--moss-soft); }
+      .mobile-memory-map .segment-number {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+      }
+      .mobile-memory-map .segment-name {
+        min-width: 0;
+        overflow: hidden;
+        font-size: 11px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .mobile-memory-map .segment-state { display: none; }
       .mobile-audio-card { display: flex; }
       .desktop-audio-card { display: none; }
+      .memory-map-card { display: none; }
       .content { min-height: 520px; padding: 27px 22px 30px; }
       .section-heading { margin-bottom: 18px; }
       .article-text { font-size: 20px; line-height: 1.95; }
@@ -676,6 +712,10 @@
           <span class="toolbar-note" id="toolbarNote">读一遍，找出画面转换</span>
         </div>
 
+        <div class="mobile-memory-map">
+          <nav class="mobile-section-nav" id="mobileSectionNav" aria-label="选择段落"></nav>
+        </div>
+
         <div class="mobile-audio-card" aria-label="当前段朗读">
           <div class="audio-copy"><strong>朗读</strong><span id="mobileAudioStatus">当前段 · 舒缓语速</span></div>
           <button class="audio-button" id="mobileAudioButton" type="button" aria-label="朗读当前段" title="朗读当前段">▶</button>
@@ -737,7 +777,7 @@
           <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
         </section>
 
-        <section class="side-card">
+        <section class="side-card memory-map-card">
           <p class="side-label" id="mapLabel">四段记忆地图</p>
           <nav class="section-nav" id="sectionNav" aria-label="选择段落"></nav>
         </section>
@@ -1094,14 +1134,17 @@
     }
 
     function renderNav() {
-      const nav = $("#sectionNav");
-      nav.innerHTML = sections.map((section, index) => `
+      const markup = sections.map((section, index) => `
         <button class="segment-button ${index === state.section ? "active" : ""}" type="button" data-section="${index}">
           <span class="segment-number">${section.number}</span>
           <span class="segment-name">${section.nav}</span>
           <span class="segment-state">${state.done.includes(index) ? "✓" : (state.best[index] ? state.best[index] + "%" : "")}</span>
         </button>
       `).join("");
+      ["#sectionNav", "#mobileSectionNav"].forEach(selector => {
+        $(selector).innerHTML = markup;
+      });
+      $("#mobileSectionNav").style.gridTemplateColumns = `repeat(${sections.length}, minmax(0, 1fr))`;
       $$(".segment-button").forEach(button => button.addEventListener("click", () => selectSection(Number(button.dataset.section))));
     }
 
