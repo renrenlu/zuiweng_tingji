@@ -852,31 +852,20 @@
 
     const yumeirenSections = [
       {
-        title: "月明故国",
-        tag: "触景伤怀",
-        phase: "上阕 · 由景入情",
-        number: "上",
-        nav: "春花秋月",
-        text: "春花秋月何时了？往事知多少。小楼昨夜又东风，故国不堪回首月明中。",
-        tip: "按时间与空间推进：春花秋月（眼前）→ 往事（过去）→ 小楼东风（昨夜）→ 故国月明（遥想）。",
+        title: "故国之愁",
+        tag: "物是人非",
+        phase: "全词 · 触景伤怀",
+        number: "一",
+        nav: "全文",
+        text: "春花秋月何时了？往事知多少。小楼昨夜又东风，故国不堪回首月明中。雕栏玉砌应犹在，只是朱颜改。问君能有几多愁？恰似一江春水向东流。",
+        tip: "按情感线串联全文：春花秋月 → 往事 → 小楼东风 → 故国月明 → 雕栏朱颜 → 一江愁水。先写物是人非，再以江水作结。",
         glossary: [
           { word: "何时了", meaning: "什么时候才能结束。了，完结。" },
           { word: "往事", meaning: "指昔日南唐宫廷生活。" },
           { word: "又东风", meaning: "春风再次吹来，点明又过了一年。" },
           { word: "故国", meaning: "已经灭亡的南唐。" },
           { word: "不堪回首", meaning: "不忍回想。" },
-          { word: "月明中", meaning: "明月照耀之下。" }
-        ]
-      },
-      {
-        title: "一江愁水",
-        tag: "以水喻愁",
-        phase: "下阕 · 由问作结",
-        number: "下",
-        nav: "一江春水",
-        text: "雕栏玉砌应犹在，只是朱颜改。问君能有几多愁？恰似一江春水向东流。",
-        tip: "先写物是人非：雕栏玉砌犹在、朱颜已改；再以问答收束，把无形的愁化成滚滚东流的江水。",
-        glossary: [
+          { word: "月明中", meaning: "明月照耀之下。" },
           { word: "雕栏玉砌", meaning: "雕花栏杆和玉石台阶，代指旧日宫殿。" },
           { word: "应犹在", meaning: "应该还在。犹，还。" },
           { word: "朱颜改", meaning: "红润的容颜已经改变，也暗含人事变迁。" },
@@ -924,11 +913,10 @@
         routeTitle: "先记住一条情感线",
         routeLine: "春花秋月 → 小楼东风 → 故国月明 → 雕栏朱颜 → 一江愁水",
         routeDescription: "从“物是人非”写到“愁如江水”，上阕追忆，下阕作结。",
-        mapLabel: "上下阕记忆地图",
+        mapLabel: "全文记忆地图",
         sections: yumeirenSections,
         audioFiles: [
-          "虞美人音频/yumeiren-1.mp3",
-          "虞美人音频/yumeiren-2.mp3"
+          "虞美人音频/yumeiren-full.mp3"
         ]
       }
     ];
@@ -980,8 +968,14 @@
       }
       sections = work.sections;
       audioFiles = work.audioFiles;
-      state.done = readStoredJSON(storageKey("done"), []);
-      state.best = readStoredJSON(storageKey("best"), {});
+      const storedDone = readStoredJSON(storageKey("done"), []);
+      const storedBest = readStoredJSON(storageKey("best"), {});
+      state.done = (Array.isArray(storedDone) ? storedDone : [])
+        .filter(index => Number.isInteger(index) && index >= 0 && index < sections.length);
+      state.best = Object.fromEntries(
+        Object.entries(storedBest && typeof storedBest === "object" ? storedBest : {})
+          .filter(([index]) => Number(index) >= 0 && Number(index) < sections.length)
+      );
     }
 
     function renderWork() {
